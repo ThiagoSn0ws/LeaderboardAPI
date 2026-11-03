@@ -99,23 +99,4 @@ curl -X POST localhost:8000/scores \
 curl "localhost:8000/leaderboard?game_name=tetris"
 ```
 
-## Conceitos que este projeto demonstra
 
-Útil para você falar sobre isso em entrevista:
-
-- **API REST**: rotas organizadas por recurso, códigos de status HTTP corretos (201 ao criar, 401 quando não autenticado, 404 quando não encontra).
-- **Autenticação com JWT**: por que senha nunca é guardada em texto puro, como funciona um token, o que significa uma rota "protegida".
-- **ORM e modelagem de dados**: relação um-para-muitos entre `Player` e `Score`.
-- **Validação de dados** com Pydantic (por exemplo, senha com no mínimo 6 caracteres, pontuação não pode ser negativa).
-- **Testes automatizados**: por que testar com um banco separado, o que é um teste de integração de API.
-- **Separação de responsabilidades**: banco, autenticação, regras de negócio e rotas em arquivos diferentes, em vez de tudo em um arquivo só.
-
-## Próximos passos (se quiser evoluir o projeto)
-
-Ideias para depois, se quiser deixar o portfólio ainda mais forte:
-
-- Fazer o deploy (Render ou Railway têm plano gratuito) e colocar o link do projeto rodando no currículo/LinkedIn, além do link do GitHub.
-- Trocar o SQLite por Postgres.
-- Usar Alembic para controlar alterações no banco (migrações) em vez de `create_all`.
-- Adicionar paginação no `/leaderboard` e no histórico de pontuações.
-- Adicionar um endpoint para "temporadas" (leaderboard que reseta periodicamente), algo comum em jogos de verdade.
