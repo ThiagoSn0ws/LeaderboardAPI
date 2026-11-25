@@ -26,7 +26,7 @@ def register_player(payload: PlayerCreate, db: Session = Depends(get_db)):
 def read_current_player(current_player: Player = Depends(get_current_player)):
     return current_player
 
-@router.patch("/players/me")
+@router.patch("/me")
 def change_password(payload: NewPassword, current_player: Player = Depends(get_current_player), db: Session = Depends(get_db)):
 
     if not(verify_password(payload.current_password, current_player.hashed_password)):

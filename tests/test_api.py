@@ -121,3 +121,86 @@ def test_leaderboard_orders_by_best_score():
     assert entries[0]["rank"] == 1
     assert entries[1]["username"] == "alice"
     assert entries[1]["best_score"] == 150  # a melhor pontuação de alice, não a última
+
+def test_delete_own_score_succeeds():
+    headers = register_and_login("Marcus")
+    response = client.post(
+        "/scores", json={"game_name": "Valorant", "points": 3605}, headers = headers
+    )
+    body = response.json()
+    score_id = body["id"]
+
+    response = client.delete(f"/scores/{score_id}", headers=headers)
+
+    assert response.status_code == 200
+
+    response = client.get("/players/Marcus/scores")
+
+    scores = response.json()
+
+    assert (len(scores)) == 0
+
+def test_delete_nonexistent_score_returns_404():
+    headers = register_and_login("Praga")
+
+    response = client.delete("/scores/9999", headers=headers)    
+
+    assert response.status_code == 404
+
+def test_delete_other_players_score_returns_403():
+    headers_a = register_and_login("JogadorA")
+    response = client.post(
+        "/scores", json={"game_name": "Overwatch", "points": 6423}, headers=headers_a
+    )
+
+    body = response.json()
+    score_id = body["id"]
+
+    headers_b = register_and_login("JogadorB")
+
+    response = client.delete(f"/scores/{score_id}", headers=headers_b)
+
+    assert response.status_code == 403
+
+def test_scores_pagination():
+    headers = register_and_login("Lillia")
+
+    for i in range(7):
+        client.post("/scores", json={"game_name": "Valorant", "points": i * 26 + 72}, headers=headers)
+
+    response = client.get("/players/Lillia/scores", params={"page": 1, "page_size": 5})
+    scores = response.json() 
+    assert len(scores) == 5  
+
+    response_pagina2 = client.get("/players/Lillia/scores", params={"page": 2, "page_size": 5})
+    scores2 = response_pagina2.json()
+    assert len(scores2) == 2
+
+def test_change_password_succeeds():
+    headers_a = register_and_login("Vinicius")
+
+    response = client.patch("/players/me", json={"current_password": "senha123", "new_password": "novasenha123"}, headers=headers_a)
+
+    assert response.status_code == 200
+
+    response = client.post(
+        "/auth/login", data={"username": "Vinicius", "password": "novasenha123"}
+    )
+    assert response.status_code == 200
+
+def test_change_password_wrong_current_password_fails():
+    headers_a = register_and_login("Gabriel")
+
+    response = client.patch("/players/me", json={"current_password": "3946i1", "new_password": "ikgiekrnmgikre"}, headers=headers_a)
+
+    assert response.status_code == 401
+
+def test_login_rate_limiting_blocks_after_5_failures():
+    client.post("/players/register", json={"username": "singed", "password": "senha123"})
+
+    for i in range(5):
+        client.post("/auth/login", data={"username": "singed", "password": "senha_errada"})
+
+    response = client.post("/auth/login", data={"username": "singed", "password": "senha_errada"})
+
+    assert response.status_code == 429

@@ -6,7 +6,6 @@ from app.routers import auth_router, leaderboard, players, scores
 
 # Cria as tabelas no banco (se ainda não existirem) quando a aplicação sobe.
 # Em um projeto maior, isso seria feito com uma ferramenta de migração como o Alembic.
-Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="Game Leaderboard API",

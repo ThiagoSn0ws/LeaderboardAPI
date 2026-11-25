@@ -22,7 +22,7 @@ class Player(Base):
     )
     bio: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
-    # A classe player representa como o jogador é salvo no banco de dados, com dados permanentes, senha protegida e ligação com as pontuações dele.
+
 
 
 class Score(Base):
@@ -37,3 +37,15 @@ class Score(Base):
     )
 
     player: Mapped["Player"] = relationship("Player", back_populates="scores")
+    season_id: Mapped[int] = mapped_column(ForeignKey("seasons.id"), nullable=True)
+
+class Season(Base):
+    __tablename__ = "seasons"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    season_name: Mapped[str] = mapped_column(String(100),index=True, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime,default=lambda: datetime.now(timezone.utc)
+    )
+    ended_at: Mapped[datetime | None] = mapped_column(nullable=True)
+    

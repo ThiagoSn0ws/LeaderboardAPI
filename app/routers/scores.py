@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.auth import get_current_player
 from app.database import get_db
-from app.models import Player, Score
+from app.models import Player, Score, Season
 from app.schemas import ScoreCreate, ScoreOut
 
 router = APIRouter(tags=["scores"])
@@ -16,11 +16,23 @@ def submit_score(
     db: Session = Depends(get_db),
 ):
     """Registra uma pontuação para o jogador autenticado (via token JWT)."""
+
+    season = db.query(Season).filter(Season.ended_at.is_(None)).first()
+
+
+    if not season:
+        season = Season(season_name="Temporada 1")
+        db.add(season)
+        db.commit()
+        db.refresh(season)
+
     score = Score(
-        player_id=current_player.id,
-        game_name=payload.game_name,
-        points=payload.points,
-    )
+    player_id=current_player.id,
+    game_name=payload.game_name,
+    points=payload.points,
+    season_id=season.id,
+)
+    
     db.add(score)
     db.commit()
     db.refresh(score)
